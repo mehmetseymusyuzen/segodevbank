@@ -1,0 +1,24 @@
+package com.segodevbank.dto;
+
+import com.segodevbank.model.Address;
+import com.segodevbank.model.City;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class CreateCustomerRequest {
+
+    private Long id;
+    private String name;
+    private String surname;
+    private String mothersMaidenName;
+    private Integer dateOfBirth;
+    private City city;
+    private Address address;
+
+}
