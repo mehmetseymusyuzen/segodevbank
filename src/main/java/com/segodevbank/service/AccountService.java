@@ -14,8 +14,8 @@ import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,20 +33,22 @@ public class AccountService {
     private final AccountRepository accountRepository;
     private final CustomerService customerService;
     private final AccountDtoConverter accountDtoConverter;
-    private final RestTemplate restTemplate;
 
     private final DirectExchange directExchange;
     private final AmqpTemplate rabbitTemplate;
 
+    private final KafkaTemplate<String, String> kafkaTemplate;
+
     public AccountService(AccountRepository accountRepository,
                           CustomerService customerService,
                           AccountDtoConverter accountDtoConverter,
-                          RestTemplate restTemplate, DirectExchange directExchange,
-                          RabbitTemplate rabbitTemplate) {
+                          DirectExchange directExchange,
+                          RabbitTemplate rabbitTemplate,
+                          KafkaTemplate<String, String> kafkaTemplate) {
         this.accountRepository = accountRepository;
         this.customerService = customerService;
         this.accountDtoConverter = accountDtoConverter;
-        this.restTemplate = restTemplate;
+        this.kafkaTemplate = kafkaTemplate;
         this.directExchange = directExchange;
         this.rabbitTemplate = rabbitTemplate;
     }
@@ -196,14 +198,26 @@ public class AccountService {
     public void finalizeTransfer(MoneyTransferRequest transferRequest) {
         Optional<Account> accountOptional = accountRepository.findById(transferRequest.getFromId());
         accountOptional.ifPresentOrElse(account ->
-                        System.out.println("Sender(" + account.getId() + ") new account balance: " + account.getBalance()),
-                () -> System.out.println("Account not found")
+                {
+                    String notificationMessage = "Dear customer %s \n Your money transfer request has been succeed. Your new balance is %s";
+                    System.out.println("Sender(" + account.getId() +") new account balance: " + account.getBalance());
+                    String senderMessage = String.format(notificationMessage, account.getId(), account.getBalance());
+                    kafkaTemplate.send("transfer-notification",  senderMessage);
+                }, () -> System.out.println("Account not found")
         );
+
         Optional<Account> accountToOptional = accountRepository.findById(transferRequest.getToId());
         accountToOptional.ifPresentOrElse(account ->
-                        System.out.println("Receiver(" + account.getId() + ") new account balance: " + account.getBalance()),
+                {
+                    String notificationMessage = "Dear customer %s \n You received a money transfer from %s. Your new balance is %s";
+                    System.out.println("Receiver(" + account.getId() +") new account balance: " + account.getBalance());
+                    String receiverMessage = String.format(notificationMessage, account.getId(), transferRequest.getFromId(), account.getBalance());
+                    kafkaTemplate.send("transfer-notification",  receiverMessage);
+                },
                 () -> System.out.println("Account not found")
         );
+
+
     }
 
 }
