@@ -29,17 +29,6 @@ public class SegodevbankApplication implements CommandLineRunner {
         SpringApplication.run(SegodevbankApplication.class, args);
     }
 
-    @Bean
-    public OpenAPI customOpenAPI(@Value("${application-description}") String description,
-                                 @Value("${application-version}") String version) {
-        return new OpenAPI()
-                .info(new Info()
-                        .title("SegodevBank API")
-                        .version(version)
-                        .description(description)
-                        .license(new License().name("SegodevBank API Licence")));
-    }
-
     @Override
     public void run(String... args) throws Exception {
         Customer c1 = Customer.builder()
