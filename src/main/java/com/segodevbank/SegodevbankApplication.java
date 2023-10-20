@@ -3,18 +3,15 @@ package com.segodevbank;
 import com.segodevbank.model.*;
 import com.segodevbank.repository.AccountRepository;
 import com.segodevbank.repository.CustomerRepository;
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.info.License;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
+import org.springframework.cache.annotation.EnableCaching;
 
 import java.util.Arrays;
 
 @SpringBootApplication
+@EnableCaching
 public class SegodevbankApplication implements CommandLineRunner {
 
     private final AccountRepository accountRepository;
