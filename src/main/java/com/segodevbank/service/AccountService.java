@@ -14,6 +14,9 @@ import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -53,6 +56,7 @@ public class AccountService {
         this.rabbitTemplate = rabbitTemplate;
     }
 
+    @CachePut(value = "acccounts", key = "#id")
     public AccountDto createAccount(CreateAccountRequest accountRequest) {
 
         Customer customer = customerService.getCustomerById(accountRequest.getCustomerId());
@@ -72,7 +76,7 @@ public class AccountService {
         return accountDtoConverter.getConvertAccount(accountRepository.save(account));
     }
 
-
+    @CacheEvict(value = "accounts", allEntries = true)
     public AccountDto updateAccount(UpdateAccountRequest accountRequest, Long id) {
 
         Optional<Account> accountOptional = accountRepository.findById(id);
@@ -91,7 +95,7 @@ public class AccountService {
                 );
     }
 
-
+    @Cacheable(value = "accounts")
     public List<AccountDto> getAllCustomers() {
 
         List<Account> accountList = accountRepository.findAll();
@@ -103,7 +107,6 @@ public class AccountService {
 
     }
 
-
     public AccountDto getAccountById(Long id) {
 
         return accountRepository.findById(id)
@@ -114,6 +117,7 @@ public class AccountService {
 
     }
 
+    @CacheEvict(value = "accounts", allEntries = true)
     public void deleteAccount(Long id) {
 
         accountRepository.findById(id)

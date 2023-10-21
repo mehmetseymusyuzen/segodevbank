@@ -3,6 +3,8 @@ package com.segodevbank.dto;
 import com.segodevbank.model.Currency;
 import lombok.*;
 
+import java.io.Serializable;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -10,7 +12,7 @@ import lombok.*;
 @Builder
 @ToString
 @EqualsAndHashCode
-public class AccountDto {
+public class AccountDto implements Serializable {
 
     private Long id;
     private Integer balance;
